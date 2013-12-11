@@ -1617,31 +1617,31 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     };
 
     var url = [
-          'http' + (options.secure ? 's' : '') + ':/'
-        , options.host + ':' + options.port
+          global.location ? global.location.protocol + '/' : 'http' + (options.secure ? 's' : '') + ':/'
+        , options.host + (options.port === 80 || options.port === 443 ? '' : ':' + options.port)
         , options.resource
         , io.protocol
         , io.util.query(this.options.query, 't=' + +new Date)
       ].join('/');
 
-    if (this.isXDomain() && !io.util.ua.hasCORS) {
-      var insertAt = document.getElementsByTagName('script')[0]
-        , script = document.createElement('script');
+    var xhr = io.util.request(this.isXDomain());
 
-      script.src = url + '&jsonp=' + io.j.length;
-      insertAt.parentNode.insertBefore(script, insertAt);
+    xhr.open('GET', url, true);
+    if (this.isXDomain()) {
+      xhr.withCredentials = true;
+    }
 
-      io.j.push(function (data) {
-        complete(data);
-        script.parentNode.removeChild(script);
-      });
+    if (global.XDomainRequest && xhr instanceof XDomainRequest) {
+      xhr.onload = function () {
+        xhr.onload = empty;
+        complete(xhr.responseText);
+      };
+      xhr.onerror = function () {
+        xhr.onload = empty;
+        self.connecting = false;
+        !self.reconnecting && self.onError(xhr.responseText);
+      };
     } else {
-      var xhr = io.util.request();
-
-      xhr.open('GET', url, true);
-      if (this.isXDomain()) {
-        xhr.withCredentials = true;
-      }
       xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
           xhr.onreadystatechange = empty;
@@ -1656,8 +1656,8 @@ var io = ('undefined' === typeof module ? {} : module.exports);
           }
         }
       };
-      xhr.send(null);
     }
+    xhr.send(null);
   };
 
   /**
