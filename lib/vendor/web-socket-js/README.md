@@ -54,13 +54,13 @@ $ ruby web-socket-ruby/samples/echo_server.rb example.com 10081
 
 If it doesn't work, try these:
 
-1. Try Chrome and Firefox 3.x.
+1. Try Chrome and IE 8 or 9.
 
    - It doesn't work on Chrome:<br>
      It's likely an issue of your code or the server. Debug your code as usual e.g. using console.log.
-   - It works on Chrome but it doesn't work on Firefox:<br>
+   - It works on Chrome but it doesn't work on IE:<br>
      It's likely an issue of web-socket-js specific configuration (e.g. 3 and 4 below).
-   - It works on both Chrome and Firefox, but it doesn't work on your browser:<br>
+   - It works on both Chrome and IE, but it doesn't work on your browser:<br>
      Check "Supported environment" section below. Your browser may not be supported by web-socket-js.
 
 2. Add this line before your code:
@@ -69,21 +69,30 @@ and use Developer Tools (Chrome/Safari) or Firebug (Firefox) to see if console.l
 
 3. Make sure you do NOT open your HTML page as local file e.g. file:///.../sample.html. web-socket-js doesn't work on local file. Open it via Web server e.g. http:///.../sample.html.
 
-4. If you are NOT using web-socket-ruby or em-websocket as your WebSocket server, you need to place Flash socket policy file on your server. See "Flash socket policy file" section below for details.
+4. Make sure you host your HTML page and WebSocketMain.swf in the same domain. Otherwise, see "How to host HTML file and SWF file in different domains" section.
 
-5. Check if sample.html bundled with web-socket-js works.
+5. If you are NOT using web-socket-ruby or em-websocket as your WebSocket server, you need to place Flash socket policy file on your server. See "Flash socket policy file" section below for details.
 
-6. Make sure the port used for WebSocket (10081 in example above) is not blocked by your server/client's firewall.
+6. Check if sample.html bundled with web-socket-js works.
 
-7. Install [debugger version of Flash Player](http://www.adobe.com/support/flashplayer/downloads.html) to see Flash errors.
+7. Make sure the port used for WebSocket (10081 in example above) is not blocked by your server/client's firewall.
+
+8. Install [debugger version of Flash Player](http://www.adobe.com/support/flashplayer/downloads.html) to see Flash errors.
+
+9. If you followed the steps above and you still have an issue, please [report here](https://github.com/gimite/web-socket-js/issues) with these information:
+
+   - The WebSocket server library you use (e.g. em-websocket, pywebsocket) and its version
+   - The Web browser you use and its version
+   - The exact message you are trying to send from the server or the client
+   - The result of all steps above, especially error message in step 2 if any
 
 
 ## Supported environments
 
 It should work on:
 
-- Google Chrome 4 or later (just uses native implementation)
-- Firefox 3.x, 4.x, Internet Explorer 8, 9 + Flash Player 10 or later
+- Google Chrome 4 or later, Firefox 6 or later (uses native WebSocket or MozWebSocket implementation)
+- Firefox 3 to 5, Internet Explorer 8, 9 + Flash Player 10 or later
 
 It may or may not work on other browsers such as Safari, Opera or IE 6. Patch for these browsers are appreciated, but I will not work on fixing issues specific to these browsers by myself.
 
@@ -103,7 +112,11 @@ This implementation uses Flash's socket, which means that your server must provi
 
 If you use [web-socket-ruby](http://github.com/gimite/web-socket-ruby/tree/master) or [em-websocket](https://github.com/igrigorik/em-websocket), you don't need anything special, because they handle Flash socket policy file request. But if you already provide socket policy file at port **843**, you need to modify the file to allow access to Web Socket port, because it precedes what the libraries provide.
 
-If you use other Web Socket server implementation, you need to provide socket policy file yourself. See [Setting up A Flash Socket Policy File](http://www.lightsphere.com/dev/articles/flash_socket_policy.html) for details and sample script to run socket policy file server. [node.js implementation is available here](http://github.com/LearnBoost/Socket.IO-node/blob/master/lib/socket.io/transports/flashsocket.js).
+If you use other Web Socket server implementation, you need to provide socket policy file yourself. See [Setting up A Flash Socket Policy File](http://www.lightsphere.com/dev/articles/flash_socket_policy.html) for details. Implementation of socket policy file server is available at:
+
+- The article above (Perl implementation)
+- [Ruby implementation](https://github.com/futurechimp/flash_policy_server)
+- [Node.js implementation](https://github.com/3rd-Eden/FlashPolicyFileServer)
 
 Actually, it's still better to provide socket policy file at port 843 even if you use web-socket-ruby or em-websocket. Flash always try to connect to port 843 first, so providing the file at port 843 makes startup faster.
 
@@ -119,7 +132,7 @@ Note that it's technically possible that client sends arbitrary string as Cookie
 
 ### Proxy support
 
-[The WebSocket spec](http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol) specifies instructions for User Agents to support proxied connections by implementing the HTTP CONNECT method.
+[The WebSocket spec](http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-10) specifies instructions for User Agents to support proxied connections by implementing the HTTP CONNECT method.
 
 The AS3 Socket class doesn't implement this mechanism, which renders it useless for the scenarios where the user trying to open a socket is behind a proxy. 
 
@@ -147,9 +160,8 @@ Install [Flex 4 SDK](http://opensource.adobe.com/wiki/display/flexsdk/Download+F
 
 ## WebSocket protocol versions
 
-- web-socket-js supports [Hixie 76 version](http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76) of WebSocket protocol by default i.e. in [master branch](https://github.com/gimite/web-socket-js).
-- If you want to try newer [Hybi 07 version](http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07), check out from [hybi-07 branch](https://github.com/gimite/web-socket-js/tree/hybi-07). This will become the master branch in the future, probably when Chrome switches to Hybi 07.
-- Hixie 75 or before is no longer supported.
+- web-socket-js speaks WebSocket protocol defined in [RFC 6455](http://tools.ietf.org/html/rfc6455).
+- web-socket-js doesn't speak old draft versions of WebSocket protocol including hixie-76, which was supported by old version of this library. If you really need web-socket-js which speaks hixie-76, you can get it from [hixie-76 branch](https://github.com/gimite/web-socket-js/tree/hixie-76), but the branch is no longer maintained.
 
 
 ## License

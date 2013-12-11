@@ -1,9 +1,7 @@
 // Copyright: Hiroshi Ichikawa <http://gimite.net/en/>
 // License: New BSD License
-// Reference: http://dev.w3.org/html5/websockets/
-// Reference: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76
 
-package {
+package net.gimite.websocket {
 
 import flash.display.Sprite;
 import flash.external.ExternalInterface;
@@ -40,6 +38,9 @@ public class WebSocketMain extends Sprite implements IWebSocketLogger{
   
   public function setDebug(val:Boolean):void {
     debug = val;
+    if (val) {
+      log("debug enabled");
+    }
   }
   
   private function loadDefaultPolicyFile(wsUrl:String):void {
@@ -73,6 +74,15 @@ public class WebSocketMain extends Sprite implements IWebSocketLogger{
     eventObj.protocol = webSocket.getAcceptedProtocol();
     if (event.message !== null) {
       eventObj.message = event.message;
+    }
+    if (event.wasClean) {
+      eventObj.wasClean = event.wasClean;
+    }
+    if (event.code) {
+      eventObj.code = event.code;
+    }
+    if (event.reason !== null) {
+      eventObj.reason = event.reason;
     }
     return eventObj;
   }
